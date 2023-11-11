@@ -10,9 +10,9 @@ columnNames = ['time', 'interval', 'temps']
 # read in csv data to analyze
 data = pd.read_csv('./wiseWaterExData.csv', names=columnNames, header=0, usecols=[0, 1, 2])
 
-degree = chr(176)  # Char for degree symbol
+degree = chr(176)  # char for degree symbol
 tempLimit = float(input("What is the lowest acceptable temp. in " + degree + "C?  "))
-dataLength = len(data)  # Indexing starts at 0
+dataLength = len(data)  # indexing starts at 0
 flagOne = False
 eventCounter = 1
 
@@ -34,30 +34,30 @@ if flagOne is True:
     endTime = 0
     # loop through data
     for i in range(dataLength):
-        if data.temps[i] < tempLimit and flagTwo is False:
+        if data.temps[i] < tempLimit and flagTwo is False: # this indicates the start of an event
             lowPoint = 100
             startI = i
-            startTime = datetime.strptime(data.time[i], "%m/%d/%Y %H:%M:%S %p")
+            startTime = datetime.strptime(data.time[i], "%m/%d/%Y %H:%M:%S %p") # restructures time for later
             flagTwo = True
-        elif data.temps[i] >= tempLimit and flagTwo is True:
-            endTime = datetime.strptime(data.time[i], "%m/%d/%Y %H:%M:%S %p")
+        elif data.temps[i] >= tempLimit and flagTwo is True: # this indicates the end of an event
+            endTime = datetime.strptime(data.time[i], "%m/%d/%Y %H:%M:%S %p") # restructures time for later
             endI = i
-            for j in range(startI, endI):
+            for j in range(startI, endI): # finds low point in total event for spike
                 if data.temps[j] <= lowPoint:
                     lowPoint = data.temps[j]
-                    spikeTime = datetime.strptime(data.time[j], "%m/%d/%Y %H:%M:%S %p")
+                    spikeTime = datetime.strptime(data.time[j], "%m/%d/%Y %H:%M:%S %p") # restructures time for later
             totalTime = endTime - startTime
             # add lambda expression to remove small intervals, such as min of 3 minutes
             print('\t', eventCounter, '\t\t', startTime, '\t\t', endTime, '\t\t', lowPoint, '\t\t', spikeTime, '\t\t', totalTime)
             eventCounter += 1
             flagTwo = False
-        elif i + 1 >= dataLength and data.temps[i] < tempLimit:
-            endTime = datetime.strptime(data.time[i], "%m/%d/%Y %H:%M:%S %p")
+        elif i + 1 >= dataLength and data.temps[i] < tempLimit: # this checks for edge case where last data point is included in event
+            endTime = datetime.strptime(data.time[i], "%m/%d/%Y %H:%M:%S %p") # restructures time for later
             endI = i
             for j in range(startI, endI):
                 if data.temps[j] <= lowPoint:
                     lowPoint = data.temps[j]
-                    spikeTime = datetime.strptime(data.time[j], "%m/%d/%Y %H:%M:%S %p")
+                    spikeTime = datetime.strptime(data.time[j], "%m/%d/%Y %H:%M:%S %p") # restructures time for later
             totalTime = endTime - startTime
             # add lambda expression to remove small intervals, such as min of 3 minutes
             print('\t', eventCounter, '\t\t', startTime, '\t\t', endTime, '\t\t', lowPoint, '\t\t', spikeTime, '\t\t', totalTime)
@@ -66,18 +66,13 @@ if flagOne is True:
     # print statements for output
     print('\nThe temperature of the water DID dip below the lowest acceptable input.')
     print('\nThe lowest limit was exceeded ' + str(eventCounter-1) + ' times.')
-    # plot here
-    plt.scatter(data.time, data.temps)
-    plt.xlabel('Time in Days')
-    plt.ylabel('Water Temperature in degrees C')
-    plt.axhline(y=tempLimit, color='red', linestyle='--', label='temp. limit')
-    plt.title('Temperature of Water in the NRV Mall Watershed Over Time')
-    plt.show()
 else:
     print('\nThe temperature of the water DID NOT dip below the lowest acceptable value.')
-    plt.scatter(data.time, data.temps)
-    plt.xlabel('Time in Days')
-    plt.ylabel('Water Temperature in degrees C')
-    plt.axhline(y=tempLimit, color='red', linestyle='--', label='temp. limit')
-    plt.title('Temperature of Water in the NRV Mall Watershed Over Time')
-    plt.show()
+
+# plot creation for data
+plt.scatter(data.time, data.temps)
+plt.xlabel('Time in Days')
+plt.ylabel('Water Temperature in degrees C')
+plt.axhline(y=tempLimit, color='red', linestyle='--', label='temp. limit')
+plt.title('Temperature of Water in the NRV Mall Watershed Over Time')
+plt.show()
